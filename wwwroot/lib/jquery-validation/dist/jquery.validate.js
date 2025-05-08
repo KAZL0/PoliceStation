@@ -686,7 +686,8 @@ $.extend( $.validator, {
 		},
 
 		clean: function( selector ) {
-			return $( selector )[ 0 ];
+			// Ensure the selector is interpreted as a CSS selector within the current form
+			return $( this.currentForm ).find( selector )[ 0 ];
 		},
 
 		errors: function() {
