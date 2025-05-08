@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PoliceStation")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8f686dc4c168f2931bc4af400d744ce34bbf499b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c62325665c124254fcd11068b697392874eda324")]
 [assembly: System.Reflection.AssemblyProductAttribute("PoliceStation")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PoliceStation")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
