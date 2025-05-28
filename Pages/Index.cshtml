@@ -1,8 +1,11 @@
 ﻿@page
 @model IndexModel
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@attribute [Authorize]
 @{
     ViewData["Title"] = "Dashboard";
-    Layout = null; // Remove this if using a layout
+    Layout = null;
 }
 
 <!DOCTYPE html>
@@ -29,6 +32,43 @@
             font-weight: 600;
             margin-bottom: 1rem;
         }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            width: 100%;
+            text-align: left;
+            padding: 0.25rem 1rem;
+        }
+        .logout-btn:hover {
+            background-color: #f8f9fa;
+        }
+        .welcome-message {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -36,11 +76,70 @@
     <nav class="navbar navbar-expand-lg navbar-dark px-4">
         <a class="navbar-brand" href="#">Police Inspectorate System</a>
         <div class="ms-auto">
-            <span>👮 Chief Inspector</span>
+            <div class="dropdown">
+                <button class="btn btn-link dropdown-toggle text-white text-decoration-none" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            @{
+                                var roleIcon = User.IsInRole("Chief") ? "👑" : 
+                                              User.IsInRole("Lieutenant") ? "🎖️" : 
+                                              User.IsInRole("Sergeant") ? "🔰" : 
+                                              User.IsInRole("Detective") ? "🕵️" : "👮";
+                            }
+                            @roleIcon
+                        </div>
+                        <div>
+                            <div>@(User.FindFirst("FullName")?.Value ?? "Unknown User")</div>
+                            <small>@(User.FindFirst(ClaimTypes.Role)?.Value ?? "No Role")</small>
+                        </div>
+                    </div>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li><h6 class="dropdown-header">@(User.Identity?.Name ?? "Unknown")</h6></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            👤 Profile Settings
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            🔧 Preferences  
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="logout-btn">
+                                🚪 Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 
     <div class="container my-4">
+        <!-- Welcome Message -->
+        <div class="welcome-message">
+            <h4>Welcome back, @(User.FindFirst("FullName")?.Value ?? "Officer")! 👋</h4>
+            <p class="mb-0">
+                @{
+                    var stationId = User.FindFirst("StationId")?.Value;
+                    var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                }
+                @if (!string.IsNullOrEmpty(stationId))
+                {
+                    <span>Station @stationId • @(role ?? "Officer")</span>
+                }
+                else
+                {
+                    <span>@(role ?? "Officer") • Police Inspectorate System</span>
+                }
+            </p>
+        </div>
+
         <!-- Top Stats -->
         <div class="row text-center mb-4">
             <div class="col-md-3"><div class="card p-3 bg-light"><h5>12</h5><p>Police Stations</p></div></div>
@@ -60,7 +159,10 @@
             <div class="col-md-4">
                 <div class="card p-3">
                     <h6 class="section-title">Quick Actions</h6>
-                    <button class="btn btn-primary mb-2 w-100">Add New Station</button>
+                    @if (User.IsInRole("Chief") || User.IsInRole("Lieutenant"))
+                    {
+                        <button class="btn btn-primary mb-2 w-100">Add New Station</button>
+                    }
                     <button class="btn btn-primary mb-2 w-100">Add Officer</button>
                     <button class="btn btn-primary w-100">Create New Case</button>
                 </div>
@@ -97,6 +199,7 @@
                 <li class="list-group-item">📝 New Case Created: Armed Robbery <span class="float-end">by System</span></li>
                 <li class="list-group-item">📅 Conference Scheduled: Briefing ; 14:00 <span class="float-end">by Chief</span></li>
                 <li class="list-group-item">⚙️ System Update completed successfully <span class="float-end">by System</span></li>
+                <li class="list-group-item">👤 @(User.FindFirst("FullName")?.Value ?? "User") logged in <span class="float-end">Just now</span></li>
             </ul>
         </div>
     </div>
@@ -104,5 +207,7 @@
     <footer class="text-center py-3">
         &copy; 2025 Police Inspectorate System. All rights reserved.
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
